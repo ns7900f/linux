@@ -62,7 +62,30 @@ ll->tail = ll->tail->next;
 ll->size++;
 return 0;
 }//fin list_insert
-int list_delete(struct LLIST *ll, struct THREADINFO *thr_info) 
+int list_delete(struct LLIST *ll, struct THREADINFO *thr_info){ 
+struct LLNODE *curr, *temp;
+if(ll->head == NULL) return -1;
+if(compare(thr_info, &ll->head->threadinfo) == 0) {
+temp = ll->head;
+ll->head = ll->head->next;
+if(ll->head == NULL) ll->tail = ll->head;
+free(temp);
+ll->size--;
+return 0;
+}
+for(curr = ll->head; curr->next != NULL; curr = curr->next) {
+if(compare(thr_info, &curr->next->threadinfo) == 0) {
+temp = curr->next;
+if(temp == ll->tail) ll->tail = curr;
+curr->next = curr->next->next;
+free(temp);
+ll->size--;
+return 0;
+}
+}
+return -1;
+}
+  
 void list_dump(struct LLIST *ll) {
 struct LLNODE *curr;
 struct THREADINFO *thr_info;
@@ -209,9 +232,7 @@ sent = send(curr->threadinfo.sockfd, (void *)&spacket, sizeof(struct PACKET), 0)
 }
 pthread_mutex_unlock(&clientlist_mutex);
 }
-}
-pthread_mutex_unlock(&clientlist_mutex);
-}
+
 else if(!strcmp(packet.option, "send")) {
 pthread_mutex_lock(&clientlist_mutex);
 for(curr = client_list.head; curr != NULL; curr = curr->next) {
