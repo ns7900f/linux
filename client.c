@@ -138,23 +138,24 @@ int newfd, err_ret;
 struct sockaddr_in serv_addr;//pour communiquer via internet
 struct hostent *to;//for host
 
-
-if((to = gethostbyname(SERVERIP))==NULL) {
+/* generate address */
+if((to = gethostbyname(SERVERIP))==NULL) {//gethostbyname:receive info for host name
 err_ret = errno;
 fprintf(stderr, "gethostbyname() error...\n");
 return err_ret;
 }
+/*open a socket*/
 if((newfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 err_ret = errno;
 fprintf(stderr, "socket() error...\n");
 return err_ret;
 }
-
+/*set initial values*/
 serv_addr.sin_family = AF_INET;
 serv_addr.sin_port = htons(SERVERPORT);
 serv_addr.sin_addr = *((struct in_addr *)to->h_addr);
 memset(&(serv_addr.sin_zero), 0, 8);
-
+/*try to connect with server */
 if(connect(newfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {
 err_ret = errno;
 fprintf(stderr, "connect() error...\n");
@@ -176,7 +177,7 @@ return;
 memset(&packet, 0, sizeof(struct PACKET));
 strcpy(packet.option, "exit");
 strcpy(packet.alias, me->alias);
-
+/*send request to close this connection*/
 sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
 isconnected = 0;
 }
@@ -192,7 +193,7 @@ memset(&packet, 0, sizeof(struct PACKET));
 strcpy(packet.option, "change");
 strcpy(packet.alias, me->alias);
 
-sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
+sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);//send packet
 }
 
 void *receiver(void *param) {
