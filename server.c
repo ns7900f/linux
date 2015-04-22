@@ -99,7 +99,15 @@ printf("[%d] %s\n", thr_info->sockfd, thr_info->alias);
 int sockfd, newfd;
 struct THREADINFO thread_info[CLIENTS];
 struct LLIST client_list;
-//initialize linked list
+pthread_mutex_t clientlist_mutex;
+void *io_handler(void *param);
+void *client_handler(void *fd);
+int main(int argc, char **argv) {
+int err_ret, sin_size;
+struct sockaddr_in serv_addr, client_addr;
+pthread_t interrupt;
+
+list_init(&client_list);//initialize linked list
 
 pthread_mutex_init(&clientlist_mutex, NULL);//initiate mutex
 
