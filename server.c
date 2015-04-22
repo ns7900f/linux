@@ -18,14 +18,14 @@
 #define OPTLEN 16
 #define LENGTH 512
 struct PACKET {
-char option[OPTLEN]; // instruction
-char alias[ALIASLEN]; // client's alias
-char buff[BUFFSIZE]; // payload
+char option[OPTLEN]; 
+char alias[ALIASLEN]; 
+char buff[BUFFSIZE]; 
 };
 struct THREADINFO {
-pthread_t thread_ID; // thread's pointer
-int sockfd; // socket file descriptor
-char alias[ALIASLEN]; // client's alias
+pthread_t thread_ID; 
+int sockfd; 
+char alias[ALIASLEN]; 
 };
 struct LLNODE {
 struct THREADINFO threadinfo;
@@ -101,41 +101,41 @@ int main(int argc, char **argv) {
 int err_ret, sin_size;
 struct sockaddr_in serv_addr, client_addr;
 pthread_t interrupt;
-/* initialize linked list */
+
 list_init(&client_list);
-/* initiate mutex */
+
 pthread_mutex_init(&clientlist_mutex, NULL);
-/* open a socket */
+
 if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 err_ret = errno;
 fprintf(stderr, "socket() failed...\n");
 return err_ret;
 }
-/* set initial values */
+
 serv_addr.sin_family = AF_INET;
 serv_addr.sin_port = htons(PORT);
 serv_addr.sin_addr.s_addr = inet_addr(IP);
 memset(&(serv_addr.sin_zero), 0, 8);
-/* bind address with socket */
+
 if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {
 err_ret = errno;
 fprintf(stderr, "bind() failed...\n");
 return err_ret;
 }
-/* start listening for connection */
+
 if(listen(sockfd, BACKLOG) == -1) {
 err_ret = errno;
 fprintf(stderr, "listen() failed...\n");
 return err_ret;
 }
-/* initiate interrupt handler for IO controlling */
+
 printf("Starting server...\n");
 if(pthread_create(&interrupt, NULL, io_handler, NULL) != 0) {
 err_ret = errno;
 fprintf(stderr, "pthread_create() failed...\n");
 return err_ret;
 }
-/* keep accepting connections */
+
 printf("accepting connections...\n");
 while(1) {
 sin_size = sizeof(struct sockaddr_in);
@@ -165,7 +165,7 @@ void *io_handler(void *param) {
 char option[OPTLEN];
 while(scanf("%s", option)==1) {
 if(!strcmp(option, "exit")) {
-/* clean up */
+
 printf("Terminating server...\n");
 pthread_mutex_destroy(&clientlist_mutex);
 close(sockfd);
@@ -271,7 +271,7 @@ else {
 fprintf(stderr, "wrong data send from [%d] %s...\n", threadinfo.sockfd, threadinfo.alias);
 }
 }
-/* clean up */
+
 close(threadinfo.sockfd);
 return NULL;
 }
