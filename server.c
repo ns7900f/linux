@@ -228,22 +228,6 @@ sent = send(curr->threadinfo.sockfd, (void *)&spacket, sizeof(struct PACKET), 0)
 }
 pthread_mutex_unlock(&clientlist_mutex);
 }
-else if(!strcmp(packet.option, "sfile")) {
-int i;
-char target[ALIASLEN];
-for(i = 0; packet.buff[i] != ' '; i++); packet.buff[i++] = 0;
-strcpy(target, packet.buff);
-pthread_mutex_lock(&clientlist_mutex);
-for(curr = client_list.head; curr != NULL; curr = curr->next) {
-if(strcmp(target, curr->threadinfo.alias) == 0) {
-struct PACKET spacket;
-memset(&spacket, 0, sizeof(struct PACKET));
-if(!compare(&curr->threadinfo, &threadinfo)) continue;
-strcpy(spacket.option, "msg");
-strcpy(spacket.alias, packet.alias);
-strcpy(spacket.buff, &packet.buff[i]);
-sent = send(curr->threadinfo.sockfd, (void *)&spacket, sizeof(struct PACKET), 0);
-}
 }
 pthread_mutex_unlock(&clientlist_mutex);
 }
