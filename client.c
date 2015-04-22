@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>//defini des fonction comme malloc,free,...
 #include <string.h>
 #include <errno.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <pthread.h>
+#include <pthread.h>//for threading link with lpthread
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -20,52 +20,56 @@
 #define LINEBUFF 2048
 #define LENGTH 512
 struct PACKET {
-char option[OPTLEN]; 
-char alias[ALIASLEN]; 
-char buff[BUFFSIZE]; 
+char option[OPTLEN];//instruction 
+char alias[ALIASLEN]; //username du client
+char buff[BUFFSIZE]; //size du message
 
 };
 struct USER {
-int sockfd; 
-char alias[ALIASLEN]; 
+int sockfd;// user s socket file descriptor:objets generiques avec des methodes generiques (open(),
+//close(),...)
+char alias[ALIASLEN];//user s name 
 };
 struct THREADINFO {
-pthread_t thread_ID; 
-int sockfd; 
+pthread_t thread_ID;//recuperer l ID dun thread
+int sockfd; //socket file descriptor
 };
 int isconnected, sockfd;
 char option[LINEBUFF];
 struct USER me;
 
 int connect_with_server();
-void setalias(struct USER *me);
-void logout(struct USER *me);
-void login(struct USER *me);
-void *receiver(void *param);
-void sendtoall(struct USER *me, char *msg); 
-void sendtoclient(struct USER *me, char * target, char *msg);
-int main(int argc, char **argv) {
+void setalias(struct USER *me);//set username
+void logout(struct USER *me);//desconnecter de serveur
+void login(struct USER *me);//login
+void *receiver(void *param);//receive message
+void sendtoall(struct USER *me, char *msg); //broadcast
+void sendtoclient(struct USER *me, char * target, char *msg);//send to specific user
+int main(int argc, char **argv) {/*argv est un tableau de pointeures:chacun de ces pointeures
+pointe sur des chaines de caracteres,argc indique le nonmbre de chaine de caracteres sur lequele pointe argv*/
 int sockfd, aliaslen;
-memset(&me, 0, sizeof(struct USER));
+memset(&me, 0, sizeof(struct USER));/*3 arguments le premier est la zone memoire que nous voulons remplir,
+le deuxieme est le caractere de remplissage et le dernier definit la taille donc cest de remplir une zone memoire
+avec un caractere desire*/
 while(gets(option)) {
-if(!strncmp(option, "exit", 4)) {
+if(!strncmp(option, "exit", 4)) {/*strncmp:permette de compere deux chaines de caracteres sauf qu elle permet de 
+comparer au maximum les n premieres octets des 2 chaines de caracteres.le n est le troisieme argument de la fonction ,
+les deux premiers etant les deux chaines de caracteres a comparer */
 logout(&me);
 break;
 }
 else if(!strncmp(option, "login", 5)) {
 char *ptr = strtok(option, " ");
-ptr = strtok(0, " ");
+ptr = strtok(0, " ");//set ptr as username
 memset(me.alias, 0, sizeof(char) * ALIASLEN);
 if(ptr != NULL) {
-aliaslen = strlen(ptr);
+aliaslen = strlen(ptr);//strlen:calcul la longeur du chaine de caractere
 if(aliaslen > ALIASLEN) ptr[ALIASLEN] = 0;
-strcpy(me.alias, ptr);
+strcpy(me.alias, ptr);//copy ptr dans me.alias
 }
 else {
 
-strcpy(me.alias, "Anonymous");
-
-
+strcpy(me.alias, "Anonymous");//copy anonymous to me.alias
 
 }
 login(&me);
@@ -131,8 +135,8 @@ fprintf(stderr, "Connection rejected...\n");
 
 int connect_with_server() {
 int newfd, err_ret;
-struct sockaddr_in serv_addr;
-struct hostent *to;
+struct sockaddr_in serv_addr;//pour communiquer via internet
+struct hostent *to;//for host
 
 
 if((to = gethostbyname(SERVERIP))==NULL) {
