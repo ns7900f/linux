@@ -20,30 +20,30 @@
 #define LINEBUFF 2048
 #define LENGTH 512
 struct PACKET {
-char option[OPTLEN]; // instruction
-char alias[ALIASLEN]; // client's username
-char buff[BUFFSIZE]; // message size
+char option[OPTLEN]; 
+char alias[ALIASLEN]; 
+char buff[BUFFSIZE]; 
 
 };
 struct USER {
-int sockfd; // user's socket file descriptor: objets génériques avec des méthodes génériques (open(), close(), read(), write(), ...).
-char alias[ALIASLEN]; // user's name
+int sockfd; 
+char alias[ALIASLEN]; 
 };
 struct THREADINFO {
-pthread_t thread_ID; // thread's pointer:récupérer l'ID d'un thread
-int sockfd; // socket file descriptor
+pthread_t thread_ID; 
+int sockfd; 
 };
 int isconnected, sockfd;
 char option[LINEBUFF];
 struct USER me;
 
 int connect_with_server();
-void setalias(struct USER *me);//set username
-void logout(struct USER *me);//desconnecter de serveur
-void login(struct USER *me);//login
-void *receiver(void *param);//receive message
-void sendtoall(struct USER *me, char *msg); //broadcast
-void sendtoclient(struct USER *me, char * target, char *msg);//send to specific user
+void setalias(struct USER *me);
+void logout(struct USER *me);
+void login(struct USER *me);
+void *receiver(void *param);
+void sendtoall(struct USER *me, char *msg); 
+void sendtoclient(struct USER *me, char * target, char *msg);
 int main(int argc, char **argv) {
 int sockfd, aliaslen;
 memset(&me, 0, sizeof(struct USER));
@@ -54,16 +54,16 @@ break;
 }
 else if(!strncmp(option, "login", 5)) {
 char *ptr = strtok(option, " ");
-ptr = strtok(0, " ");//set ptr as username
+ptr = strtok(0, " ");
 memset(me.alias, 0, sizeof(char) * ALIASLEN);
 if(ptr != NULL) {
-aliaslen = strlen(ptr);//strlen:calcule la longeur du chaine de caractere
+aliaslen = strlen(ptr);
 if(aliaslen > ALIASLEN) ptr[ALIASLEN] = 0;
-strcpy(me.alias, ptr);//copy ptr in me.alias
+strcpy(me.alias, ptr);
 }
 else {
 
-strcpy(me.alias, "Anonymous");//copy Anonymous to me.alias
+strcpy(me.alias, "Anonymous");
 
 
 
@@ -131,30 +131,26 @@ fprintf(stderr, "Connection rejected...\n");
 
 int connect_with_server() {
 int newfd, err_ret;
-struct sockaddr_in serv_addr;//pour communiquer via internet
-struct hostent *to;//for host
+struct sockaddr_in serv_addr;
+struct hostent *to;
 
-/* generate address */
-if((to = gethostbyname(SERVERIP))==NULL) {// gethostbyname: recieve info for host name
+
+if((to = gethostbyname(SERVERIP))==NULL) {
 err_ret = errno;
 fprintf(stderr, "gethostbyname() error...\n");
 return err_ret;
 }
-
-/* open a socket */
 if((newfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 err_ret = errno;
 fprintf(stderr, "socket() error...\n");
 return err_ret;
 }
 
-/* set initial values */
 serv_addr.sin_family = AF_INET;
 serv_addr.sin_port = htons(SERVERPORT);
 serv_addr.sin_addr = *((struct in_addr *)to->h_addr);
 memset(&(serv_addr.sin_zero), 0, 8);
 
-/* try to connect with server */
 if(connect(newfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {
 err_ret = errno;
 fprintf(stderr, "connect() error...\n");
@@ -176,7 +172,7 @@ return;
 memset(&packet, 0, sizeof(struct PACKET));
 strcpy(packet.option, "exit");
 strcpy(packet.alias, me->alias);
-/* send request to close this connetion */
+
 sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
 isconnected = 0;
 }
@@ -191,8 +187,8 @@ return;
 memset(&packet, 0, sizeof(struct PACKET));
 strcpy(packet.option, "change");
 strcpy(packet.alias, me->alias);
-/* send request to close this connetion */
-sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);//send packet
+
+sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
 }
 
 void *receiver(void *param) {
@@ -228,7 +224,7 @@ memset(&packet, 0, sizeof(struct PACKET));
 strcpy(packet.option, "send");
 strcpy(packet.alias, me->alias);
 strcpy(packet.buff, msg);
-/* send request to close this connetion */
+
 sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
 }
 
@@ -253,6 +249,6 @@ strcpy(packet.alias, me->alias);
 strcpy(packet.buff, target);
 strcpy(&packet.buff[targetlen], " ");
 strcpy(&packet.buff[targetlen+1], msg);
-/* send request to close this connetion */
+
 sent = send(sockfd, (void *)&packet, sizeof(struct PACKET), 0);
 }
