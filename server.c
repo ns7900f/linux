@@ -64,7 +64,7 @@ return 0;
 }//fin list_insert
 int list_delete(struct LLIST *ll, struct THREADINFO *thr_info){ 
 struct LLNODE *curr, *temp;
-if(ll->head == NULL) return -1;
+if(ll->head == NULL) return -1;//si la list vide pas de suppression
 if(compare(thr_info, &ll->head->threadinfo) == 0) {
 temp = ll->head;
 ll->head = ll->head->next;
@@ -72,7 +72,7 @@ if(ll->head == NULL) ll->tail = ll->head;
 free(temp);
 ll->size--;
 return 0;
-}
+}//compare ce queje veut le supprimer avec le premier element du list je le supprime eh le head sera le next
 for(curr = ll->head; curr->next != NULL; curr = curr->next) {
 if(compare(thr_info, &curr->next->threadinfo) == 0) {
 temp = curr->next;
@@ -81,12 +81,13 @@ curr->next = curr->next->next;
 free(temp);
 ll->size--;
 return 0;
-}
+}//comparaison avec chaque element pour chercher je que je veut le supprimer,aund je le trouve je le supprime
+//en mettant le derniere valeur du list au lieu ou je veux supprime ,eh la taille du list sera au moins 1
 }
 return -1;
-}
+}//fin du list_delet
   
-void list_dump(struct LLIST *ll) {
+void list_dump(struct LLIST *ll) {//affiche le list des clients connectees avec son nombre
 struct LLNODE *curr;
 struct THREADINFO *thr_info;
 printf("Connection count: %d\n", ll->size);
@@ -98,19 +99,11 @@ printf("[%d] %s\n", thr_info->sockfd, thr_info->alias);
 int sockfd, newfd;
 struct THREADINFO thread_info[CLIENTS];
 struct LLIST client_list;
-pthread_mutex_t clientlist_mutex;
-void *io_handler(void *param);
-void *client_handler(void *fd);
-int main(int argc, char **argv) {
-int err_ret, sin_size;
-struct sockaddr_in serv_addr, client_addr;
-pthread_t interrupt;
+//initialize linked list
 
-list_init(&client_list);
+pthread_mutex_init(&clientlist_mutex, NULL);//initiate mutex
 
-pthread_mutex_init(&clientlist_mutex, NULL);
-
-if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {//avoir le socket
 err_ret = errno;
 fprintf(stderr, "socket() failed...\n");
 return err_ret;
