@@ -18,30 +18,30 @@
 #define OPTLEN 16
 #define LENGTH 512
 struct PACKET {
-char option[OPTLEN]; 
-char alias[ALIASLEN]; 
-char buff[BUFFSIZE]; 
+char option[OPTLEN];//instruction 
+char alias[ALIASLEN];// alias du client 
+char buff[BUFFSIZE]; //taille du buffer
 };
 struct THREADINFO {
-pthread_t thread_ID; 
-int sockfd; 
+pthread_t thread_ID;//thread ointer 
+int sockfd;//soket file descriptor 
 char alias[ALIASLEN]; 
 };
 struct LLNODE {
 struct THREADINFO threadinfo;
-struct LLNODE *next;
+struct LLNODE *next;// next le suivant
 };
 struct LLIST {
-struct LLNODE *head, *tail;
+struct LLNODE *head, *tail;//head le premier element avec sa taille tail
 int size;
 };
 int compare(struct THREADINFO *a, struct THREADINFO *b) {
 return a->sockfd - b->sockfd;
-}
+}//comparaison si valeure de la difference null donc identique
 void list_init(struct LLIST *ll) {
 ll->head = ll->tail = NULL;
 ll->size = 0;
-}
+}//initialisation de la list a des valeure null
 int list_insert(struct LLIST *ll, struct THREADINFO *thr_info) {
 if(ll->size == CLIENTS) return -1;
 if(ll->head == NULL) {
@@ -55,33 +55,14 @@ ll->tail->next = (struct LLNODE *)malloc(sizeof(struct LLNODE));
 ll->tail->next->threadinfo = *thr_info;
 ll->tail->next->next = NULL;
 ll->tail = ll->tail->next;
-}
+}//pour ne depasse pas le nbr de client disponible qui peut se connecte
+//mais si la taille du list est null le premier element sera ce client qui va se connecter 
+//et le suivant sera null donc avec malloc il ya reservation du case 
+//et si la taille pas null lelement sajout au precedents donc la taille augment en plus 1 (size ++)
 ll->size++;
 return 0;
-}
-int list_delete(struct LLIST *ll, struct THREADINFO *thr_info) {
-struct LLNODE *curr, *temp;
-if(ll->head == NULL) return -1;
-if(compare(thr_info, &ll->head->threadinfo) == 0) {
-temp = ll->head;
-ll->head = ll->head->next;
-if(ll->head == NULL) ll->tail = ll->head;
-free(temp);
-ll->size--;
-return 0;
-}
-for(curr = ll->head; curr->next != NULL; curr = curr->next) {
-if(compare(thr_info, &curr->next->threadinfo) == 0) {
-temp = curr->next;
-if(temp == ll->tail) ll->tail = curr;
-curr->next = curr->next->next;
-free(temp);
-ll->size--;
-return 0;
-}
-}
-return -1;
-}
+}//fin list_insert
+int list_delete(struct LLIST *ll, struct THREADINFO *thr_info) 
 void list_dump(struct LLIST *ll) {
 struct LLNODE *curr;
 struct THREADINFO *thr_info;
