@@ -116,31 +116,31 @@ err_ret = errno;
 fprintf(stderr, "socket() failed...\n");
 return err_ret;
 }
-
-serv_addr.sin_family = AF_INET;
+/*set initiate values*/
+serv_addr.sin_family = AF_INET;//@family=internet
 serv_addr.sin_port = htons(PORT);
-serv_addr.sin_addr.s_addr = inet_addr(IP);
+serv_addr.sin_addr.s_addr = inet_addr(IP);//set l @ IP to local host
 memset(&(serv_addr.sin_zero), 0, 8);
 
-if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {
+if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) == -1) {//reserver le port sur lequel on veut secouter
 err_ret = errno;
 fprintf(stderr, "bind() failed...\n");
 return err_ret;
 }
-
+/*start listen with max connection*/
 if(listen(sockfd, BACKLOG) == -1) {
 err_ret = errno;
 fprintf(stderr, "listen() failed...\n");
 return err_ret;
 }
-
+/*initiate interrupt handler for IO controlling */
 printf("Starting server...\n");
 if(pthread_create(&interrupt, NULL, io_handler, NULL) != 0) {
 err_ret = errno;
 fprintf(stderr, "pthread_create() failed...\n");
 return err_ret;
 }
-
+/*on accepte la connexion */
 printf("accepting connections...\n");
 while(1) {
 sin_size = sizeof(struct sockaddr_in);
@@ -170,7 +170,7 @@ void *io_handler(void *param) {
 char option[OPTLEN];
 while(scanf("%s", option)==1) {
 if(!strcmp(option, "exit")) {
-
+/*clean*/
 printf("Terminating server...\n");
 pthread_mutex_destroy(&clientlist_mutex);
 close(sockfd);
@@ -258,7 +258,7 @@ else {
 fprintf(stderr, "wrong data send from [%d] %s...\n", threadinfo.sockfd, threadinfo.alias);
 }
 }
-
+/*clean*/
 close(threadinfo.sockfd);
 return NULL;
 }
